@@ -16,17 +16,27 @@ struct State {
 }
 
 impl State {
+    /// Constructs new State
     fn new() -> Self {
         Self {
             mode: GameMode::Menu
         }
     }
+
+    /// Executes game behavior for `Playing` game mode
+    fn play(&mut self, ctx: &mut BTerm) {
+        // TODO: Fill in this stub later
+        self.mode = GameMode::End;
+    }
 }
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
-        ctx.cls();
-        ctx.print(1, 1, "Hello, Bracket Terminal!");
+        match self.mode {
+            GameMode::Menu => self.main_menu(ctx),
+            GameMode::End => self.dead(ctx),
+            GameMode::Playing => self.play(ctx),
+        }
     }
 }
 
