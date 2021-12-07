@@ -28,6 +28,43 @@ impl State {
         // TODO: Fill in this stub later
         self.mode = GameMode::End;
     }
+
+    /// Restarts game
+    fn restart(&mut self) {
+        self.mode = GameMode::Playing;
+    }
+    
+    /// Displays main menu and responds to input
+    fn main_menu(&mut self, ctx: &mut BTerm) {
+        ctx.cls();
+        ctx.print_centered(5, "Welcome to Flappy Dragon!");
+        ctx.print_centered(8, "(P) Play Game");
+        ctx.print_centered(9, "(Q) Quit Game");
+
+        if let Some(key) = ctx.key {
+            match key {
+                VirtualKeyCode::P => self.restart(),
+                VirtualKeyCode::Q => ctx.quitting = true,
+                _ => ()
+            }
+        }
+    }
+
+    /// Displays game over menu and responds to input
+    fn dead(&mut self, ctx: &mut BTerm) {
+        ctx.cls();
+        ctx.print_centered(5, "You are dead.");
+        ctx.print_centered(8, "(P) Play Again");
+        ctx.print_centered(9, "(Q) Quit game");
+
+        if let Some(key) = ctx.key {
+            match key {
+                VirtualKeyCode::P => self.restart(),
+                VirtualKeyCode::Q => ctx.quitting = true,
+                _ => ()
+            }
+        }
+    }
 }
 
 impl GameState for State {
