@@ -10,6 +10,10 @@ enum GameMode {
     End,
 }
 
+const SCREEN_WIDTH: i32 = 80;
+const SCREEN_HEIGHT: i32 = 50;
+const FRAME_DURATION: f32 = 75.0;
+
 /// Player struct
 struct Player {
     x: i32,        // World-space position
