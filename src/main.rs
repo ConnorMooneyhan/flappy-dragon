@@ -35,6 +35,17 @@ impl Player {
             to_cp437('@')
         );
     }
+
+    fn gravity_and_move(&mut self) {
+        if self.velocity < 2.0 { // 2.0 is terminal velocity for the player
+            self.velocity += 0.2; // 0.2 is gravitational acceleration
+        }
+        self.y += self.velocity as i32; // Increment height by velocity
+        self.x += 1; // Increment world-space position in 'x' direction
+        if self.y < 0 {
+            self.y = 0;
+        }
+    }
 }
 
 /// Game state struct equipped with `tick` method for updating state
