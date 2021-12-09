@@ -7,13 +7,13 @@ use bracket_lib::prelude::*;
 enum GameMode {
     Menu,
     Playing,
-    End
+    End,
 }
 
 /// Player struct
 struct Player {
-    x: i32, // World-space position
-    y: i32, // Screen-space position
+    x: i32,        // World-space position
+    y: i32,        // Screen-space position
     velocity: f32, // Vertical velocity
 }
 
@@ -27,17 +27,12 @@ impl Player {
     }
 
     fn render(&mut self, ctx: &mut BTerm) {
-        ctx.set(
-            0,
-            self.y,
-            YELLOW,
-            BLACK,
-            to_cp437('@')
-        );
+        ctx.set(0, self.y, YELLOW, BLACK, to_cp437('@'));
     }
 
     fn gravity_and_move(&mut self) {
-        if self.velocity < 2.0 { // 2.0 is terminal velocity for the player
+        if self.velocity < 2.0 {
+            // 2.0 is terminal velocity for the player
             self.velocity += 0.2; // 0.2 is gravitational acceleration
         }
         self.y += self.velocity as i32; // Increment height by velocity
@@ -54,6 +49,8 @@ impl Player {
 
 /// Game state struct equipped with `tick` method for updating state
 struct State {
+    player: Player,
+    frame_time: f32,
     mode: GameMode,
 }
 
@@ -61,7 +58,9 @@ impl State {
     /// Constructs new State
     fn new() -> Self {
         Self {
-            mode: GameMode::Menu
+            player: Player::new(5, 25),
+            frame_time: 0.0,
+            mode: GameMode::Menu,
         }
     }
 
@@ -73,9 +72,11 @@ impl State {
 
     /// Restarts game
     fn restart(&mut self) {
+        self.player = Player::new(5, 25);
+        self.frame_time = 0.0;
         self.mode = GameMode::Playing;
     }
-    
+
     /// Displays main menu and responds to input
     fn main_menu(&mut self, ctx: &mut BTerm) {
         ctx.cls();
@@ -87,7 +88,7 @@ impl State {
             match key {
                 VirtualKeyCode::P => self.restart(),
                 VirtualKeyCode::Q => ctx.quitting = true,
-                _ => ()
+                _ => (),
             }
         }
     }
@@ -103,7 +104,7 @@ impl State {
             match key {
                 VirtualKeyCode::P => self.restart(),
                 VirtualKeyCode::Q => ctx.quitting = true,
-                _ => ()
+                _ => (),
             }
         }
     }
