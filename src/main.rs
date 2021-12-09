@@ -22,6 +22,7 @@ struct Player {
 }
 
 impl Player {
+    /// Generates new Player instance with given x and y coordinates
     fn new(x: i32, y: i32) -> Self {
         Self {
             x,
@@ -30,10 +31,13 @@ impl Player {
         }
     }
 
+    /// Renders Player as '@' at left of screen
     fn render(&mut self, ctx: &mut BTerm) {
         ctx.set(0, self.y, YELLOW, BLACK, to_cp437('@'));
     }
 
+    /// Iterates velocity, recalculates y-value accordingly\
+    /// Iterates world-space x-value
     fn gravity_and_move(&mut self) {
         if self.velocity < 2.0 {
             // 2.0 is terminal velocity for the player
@@ -41,11 +45,12 @@ impl Player {
         }
         self.y += self.velocity as i32; // Increment height by velocity
         self.x += 1; // Increment world-space position in 'x' direction
-        if self.y < 0 {
+        if self.y < 0 { // Checks for collision with top of screen
             self.y = 0;
         }
     }
 
+    /// Sets velocity to -2.0
     fn flap(&mut self) {
         self.velocity = -2.0;
     }
@@ -134,6 +139,7 @@ impl State {
 }
 
 impl GameState for State {
+    /// Runs next frame based on GameMode
     fn tick(&mut self, ctx: &mut BTerm) {
         match self.mode {
             GameMode::Menu => self.main_menu(ctx),
