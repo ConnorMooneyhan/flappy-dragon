@@ -70,8 +70,27 @@ impl State {
 
     /// Executes game behavior for `Playing` game mode
     fn play(&mut self, ctx: &mut BTerm) {
-        // TODO: Fill in this stub later
-        self.mode = GameMode::End;
+        ctx.cls_bg(NAVY); // Clears bg with background color NAVY
+
+        self.frame_time += ctx.frame_time_ms; // Add time elapsed since last call to `tick`
+        if self.frame_time > FRAME_DURATION { // If FRAME_DURATION has been reached, reset frame_time and run physics
+            self.frame_time = 0.0;
+            self.player.gravity_and_move();
+        }
+
+        // If player presses SPACE, flap!
+        if let Some(VirtualKeyCode::Space) = ctx.key {
+            self.player.flap();
+        }
+
+        // Render player on screen
+        self.player.render(ctx);
+        ctx.print(0, 0, "Press SPACE to flap!");
+
+        // End game if player touches ground
+        if self.player.y > SCREEN_HEIGHT {
+            self.mode = GameMode::End;
+        }
     }
 
     /// Restarts game
