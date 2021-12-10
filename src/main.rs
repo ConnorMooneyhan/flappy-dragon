@@ -144,8 +144,14 @@ impl State {
 
     /// Displays game over menu and responds to input
     fn dead(&mut self, ctx: &mut BTerm) {
+        let points_declaration = match self.score {
+            1 => "point",
+            _ => "points"
+        };
+        
         ctx.cls();
         ctx.print_centered(5, "You are dead.");
+        ctx.print_centered(6, format!("You earned {} {}!", self.score, points_declaration));
         ctx.print_centered(8, "(P) Play Again");
         ctx.print_centered(9, "(Q) Quit game");
 
