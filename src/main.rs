@@ -45,7 +45,8 @@ impl Player {
         }
         self.y += self.velocity as i32; // Increment height by velocity
         self.x += 1; // Increment world-space position in 'x' direction
-        if self.y < 0 { // Checks for collision with top of screen
+        if self.y < 0 {
+            // Checks for collision with top of screen
             self.y = 0;
         }
     }
@@ -58,9 +59,11 @@ impl Player {
 
 /// Game state struct equipped with `tick` method for updating state
 struct State {
-    player: Player,
-    frame_time: f32,
-    mode: GameMode,
+    player: Player,     // Player
+    frame_time: f32,    // Time elapsed since last frame render
+    mode: GameMode,     // GameMode,
+    score: i32,         // Score
+    obstacle: Obstacle, // Current obstacle
 }
 
 impl State {
@@ -70,6 +73,8 @@ impl State {
             player: Player::new(5, 25),
             frame_time: 0.0,
             mode: GameMode::Menu,
+            obstacle: Obstacle::new(SCREEN_WIDTH, 0),
+            score: 0,
         }
     }
 
@@ -78,7 +83,8 @@ impl State {
         ctx.cls_bg(NAVY); // Clears bg with background color NAVY
 
         self.frame_time += ctx.frame_time_ms; // Add time elapsed since last call to `tick`
-        if self.frame_time > FRAME_DURATION { // If FRAME_DURATION has been reached, reset frame_time and run physics
+        if self.frame_time > FRAME_DURATION {
+            // If FRAME_DURATION has been reached, reset frame_time and run physics
             self.frame_time = 0.0;
             self.player.gravity_and_move();
         }
@@ -150,9 +156,9 @@ impl GameState for State {
 }
 
 struct Obstacle {
-    x: i32, // Position in world-space
+    x: i32,     // Position in world-space
     gap_y: i32, // Center point of gap
-    size: i32, // Size of gap
+    size: i32,  // Size of gap
 }
 
 impl Obstacle {
@@ -161,34 +167,22 @@ impl Obstacle {
         Self {
             x,
             gap_y: random.range(10, 40),
-            size: i32::max(2,20 - score),
+            size: i32::max(2, 20 - score),
         }
     }
 
     fn render(&mut self, ctx: &mut BTerm, player_x: i32) {
         let screen_x = self.x - player_x;
         let half_size = self.size / 2;
-        
+
         // Renders top part of obstacle
         for y in 0..self.gap_y - half_size {
-            ctx.set(
-                screen_x, 
-                y, 
-                RED,
-                BLACK,
-                to_cp437('|'),
-            );
+            ctx.set(screen_x, y, RED, BLACK, to_cp437('|'));
         }
 
         // Renders bottom part of obstacle
         for y in self.gap_y + half_size..SCREEN_HEIGHT {
-            ctx.set(
-                screen_x, 
-                y, 
-                RED,
-                BLACK,
-                to_cp437('|'),
-            );
+            ctx.set(screen_x, y, RED, BLACK, to_cp437('|'));
         }
     }
 
