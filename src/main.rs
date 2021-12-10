@@ -94,12 +94,27 @@ impl State {
             self.player.flap();
         }
 
-        // Render player on screen
+        // Renders player on screen
         self.player.render(ctx);
+
+        // Renders textual info
         ctx.print(0, 0, "Press SPACE to flap!");
+        ctx.print(0, 1, &format!("Score: {}", self.score));
+
+        // Renders obstacle on screen
+        self.obstacle.render(ctx, self.player.x);
+
+        // If player has passed obstacle, generate a new one and increment score
+        if self.player.x > self.obstacle.x {
+            self.score += 1;
+            self.obstacle = Obstacle::new(
+                self.player.x + SCREEN_WIDTH,
+                self.score
+            );
+        }
 
         // End game if player touches ground
-        if self.player.y > SCREEN_HEIGHT {
+        if self.player.y > SCREEN_HEIGHT || self.obstacle.hit_obstacle(&self.player) {
             self.mode = GameMode::End;
         }
     }
