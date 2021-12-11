@@ -13,49 +13,8 @@ enum GameMode {
 const SCREEN_WIDTH: i32 = 80;
 const SCREEN_HEIGHT: i32 = 50;
 const FRAME_DURATION: f32 = 75.0;
+const TERMINAL_VELOCITY: f32 = 2.0;
 
-/// Player struct
-struct Player {
-    x: i32,        // World-space position
-    y: i32,        // Screen-space position
-    velocity: f32, // Vertical velocity
-}
-
-impl Player {
-    /// Generates new Player instance with given x and y coordinates
-    fn new(x: i32, y: i32) -> Self {
-        Self {
-            x,
-            y,
-            velocity: 0.0,
-        }
-    }
-
-    /// Renders Player as '@' at left of screen
-    fn render(&mut self, ctx: &mut BTerm) {
-        ctx.set(0, self.y, YELLOW, BLACK, to_cp437('@'));
-    }
-
-    /// Iterates velocity, recalculates y-value accordingly\
-    /// Iterates world-space x-value
-    fn gravity_and_move(&mut self) {
-        if self.velocity < 2.0 {
-            // 2.0 is terminal velocity for the player
-            self.velocity += 0.2; // 0.2 is gravitational acceleration
-        }
-        self.y += self.velocity as i32; // Increment height by velocity
-        self.x += 1; // Increment world-space position in 'x' direction
-        if self.y < 0 {
-            // Checks for collision with top of screen
-            self.y = 0;
-        }
-    }
-
-    /// Sets velocity to -2.0
-    fn flap(&mut self) {
-        self.velocity = -2.0;
-    }
-}
 
 /// Game state struct equipped with `tick` method for updating state
 struct State {
@@ -77,26 +36,26 @@ impl State {
             score: 0,
         }
     }
-
+    
     /// Executes game behavior for `Playing` game mode
     fn play(&mut self, ctx: &mut BTerm) {
         ctx.cls_bg(NAVY); // Clears bg with background color NAVY
-
+        
         self.frame_time += ctx.frame_time_ms; // Add time elapsed since last call to `tick`
         if self.frame_time > FRAME_DURATION {
             // If FRAME_DURATION has been reached, reset frame_time and run physics
             self.frame_time = 0.0;
             self.player.gravity_and_move();
         }
-
+        
         // If player presses SPACE, flap!
         if let Some(VirtualKeyCode::Space) = ctx.key {
             self.player.flap();
         }
-
+        
         // Renders player on screen
         self.player.render(ctx);
-
+        
         // Renders textual info
         ctx.print(0, 0, "Press SPACE to flap!");
         ctx.print(0, 1, &format!("Score: {}", self.score));
@@ -134,7 +93,7 @@ impl State {
         ctx.print_centered(5, "Welcome to Flappy Dragon!");
         ctx.print_centered(8, "(P) Play Game");
         ctx.print_centered(9, "(Q) Quit Game");
-
+        
         if let Some(key) = ctx.key {
             match key {
                 VirtualKeyCode::P => self.restart(),
@@ -143,7 +102,7 @@ impl State {
             }
         }
     }
-
+    
     /// Displays game over menu and responds to input
     fn dead(&mut self, ctx: &mut BTerm) {
         let points_declaration = match self.score {
@@ -156,7 +115,7 @@ impl State {
         ctx.print_centered(6, format!("You earned {} {}!", self.score, points_declaration));
         ctx.print_centered(8, "(P) Play Again");
         ctx.print_centered(9, "(Q) Quit game");
-
+        
         if let Some(key) = ctx.key {
             match key {
                 VirtualKeyCode::P => self.restart(),
@@ -178,6 +137,52 @@ impl GameState for State {
     }
 }
 
+/// Player struct
+struct Player {
+    x: i32,        // World-space position
+    y: i32,        // Screen-space position
+    velocity: f32, // Vertical velocity
+}
+
+impl Player {
+    /// Generates new Player instance with given x and y coordinates
+    fn new(x: i32, y: i32) -> Self {
+        Self {
+            x,
+            y,
+            velocity: 0.0,
+        }
+    }
+
+    /// Renders Player as '@' at left of screen
+    fn render(&mut self, ctx: &mut BTerm) {
+        ctx.set(0, self.y, YELLOW, BLACK, to_cp437('@'));
+    }
+
+    /// Iterates velocity, recalculates y-value accordingly\
+    /// Iterates world-space x-value
+    fn gravity_and_move(&mut self) {
+        if self.velocity < TERMINAL_VELOCITY {
+            self.velocity += TERMINAL_VELOCITY / 10.0; // 0.2 is gravitational acceleration
+        }
+        self.y += self.velocity as i32; // Increment height by velocity
+        self.x += 1; // Increment world-space position in 'x' direction
+        if self.y < 0 {
+            // Checks for collision with top of screen
+            self.y = 0;
+        }
+    }
+
+    /// Sets velocity to -TERMINAL_VELOCITY
+    fn flap(&mut self) {
+        self.velocity = -TERMINAL_VELOCITY;
+    }
+}
+
+/// Struct representing an obstacle
+/// * x = position in world-space
+/// * gap_y = center point of gap
+/// * size = size of gap
 struct Obstacle {
     x: i32,     // Position in world-space
     gap_y: i32, // Center point of gap
