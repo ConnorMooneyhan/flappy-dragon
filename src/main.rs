@@ -185,6 +185,7 @@ struct Obstacle {
 }
 
 impl Obstacle {
+    /// Generates new Obstacle
     fn new(x: i32, score: i32) -> Self {
         let mut random = RandomNumberGenerator::new();
         Self {
@@ -194,6 +195,7 @@ impl Obstacle {
         }
     }
 
+    /// Renders obstacle
     fn render(&mut self, ctx: &mut BTerm, player_x: i32) {
         let screen_x = self.x - player_x;
         let half_size = self.size / 2;
@@ -209,6 +211,7 @@ impl Obstacle {
         }
     }
 
+    /// Detects collision between obstacle and player
     fn hit_obstacle(&self, player: &Player) -> bool {
         let half_size = self.size / 2;
         let does_x_match = player.x == self.x;
