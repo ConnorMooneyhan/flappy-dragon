@@ -73,7 +73,7 @@ impl State {
         }
 
         // End game if player touches ground
-        if self.player.y > SCREEN_HEIGHT || self.obstacle.hit_obstacle(&self.player) {
+        if (self.player.y as i32) > SCREEN_HEIGHT || self.obstacle.hit_obstacle(&self.player) {
             self.mode = GameMode::End;
         }
     }
@@ -140,7 +140,7 @@ impl GameState for State {
 /// Player struct
 struct Player {
     x: i32,        // World-space position
-    y: i32,        // Screen-space position
+    y: f32,        // Screen-space position
     velocity: f32, // Vertical velocity
 }
 
@@ -149,14 +149,25 @@ impl Player {
     fn new(x: i32, y: i32) -> Self {
         Self {
             x,
-            y,
+            y: y as f32,
             velocity: 0.0,
         }
     }
 
     /// Renders Player as '@' at left of screen
     fn render(&mut self, ctx: &mut BTerm) {
-        ctx.set(0, self.y, YELLOW, BLACK, to_cp437('@'));
+        ctx.set_active_console(1);
+        ctx.cls();
+        ctx.set_fancy(
+            PointF::new(0.0, self.y),
+            1,
+            Degrees::new(0.0),
+            PointF::new(1.0, 1.0),
+            YELLOW,
+            BLACK,
+            to_cp437('@')
+        );
+        ctx.set_active_console(0);
     }
 
     /// Iterates velocity, recalculates y-value accordingly\
@@ -165,11 +176,11 @@ impl Player {
         if self.velocity < TERMINAL_VELOCITY {
             self.velocity += TERMINAL_VELOCITY / 10.0; // 0.2 is gravitational acceleration
         }
-        self.y += self.velocity as i32; // Increment height by velocity
+        self.y += self.velocity; // Increment height by velocity
         self.x += 1; // Increment world-space position in 'x' direction
-        if self.y < 0 {
+        if self.y < 0.0 {
             // Checks for collision with top of screen
-            self.y = 0;
+            self.y = 0.0;
         }
     }
 
@@ -220,8 +231,8 @@ impl Obstacle {
     fn hit_obstacle(&self, player: &Player) -> bool {
         let half_size = self.size / 2;
         let does_x_match = player.x == self.x;
-        let player_above_gap = player.y < self.gap_y - half_size;
-        let player_below_gap = player.y > self.gap_y + half_size;
+        let player_above_gap = (player.y as i32) < self.gap_y - half_size;
+        let player_below_gap = (player.y as i32) > self.gap_y + half_size;
         does_x_match && (player_above_gap || player_below_gap)
     }
 }
@@ -229,6 +240,7 @@ impl Obstacle {
 fn main() -> BError {
     // Configures display window
     let context = BTermBuilder::simple80x50()
+        .with_fancy_console(SCREEN_WIDTH, SCREEN_HEIGHT, "terminal8x8.png")
         .with_title("Flappy Dragon")
         .build()?;
 
